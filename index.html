@@ -14,26 +14,31 @@
             background-color: #ffe6e6; /* Light pink background */
             font-family: 'Arial', sans-serif;
             overflow: hidden; /* Prevents scrollbars when button moves */
+            touch-action: manipulation; /* Improves touch response on mobile */
         }
 
         .container {
             text-align: center;
             position: relative;
+            z-index: 1;
         }
 
         /* Styling for the images */
         img {
             max-width: 300px;
+            max-height: 40vh; /* Prevents image from taking up too much vertical space on phones */
             border-radius: 15px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             margin-bottom: 20px;
             transition: transform 0.3s;
+            object-fit: cover;
         }
 
         h1 {
             color: #ff4d4d;
-            font-size: 2.5rem;
-            margin-bottom: 30px;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            padding: 0 10px;
         }
 
         .buttons {
@@ -41,6 +46,7 @@
             justify-content: center;
             gap: 20px;
             align-items: center;
+            flex-wrap: wrap; /* Allows wrapping on very small screens */
         }
 
         button {
@@ -50,6 +56,7 @@
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent; /* Removes blue highlight on mobile tap */
         }
 
         #yesBtn {
@@ -57,6 +64,7 @@
             color: white;
             font-weight: bold;
             box-shadow: 0 4px 6px rgba(255, 77, 77, 0.4);
+            z-index: 10; /* Ensures Yes is always on top visually if overlap somehow happened */
         }
 
         #yesBtn:hover {
@@ -68,12 +76,13 @@
             background-color: #ffffff;
             color: #ff4d4d;
             border: 2px solid #ff4d4d;
-            position: relative; /* Allows us to move it easily */
+            position: relative; 
+            z-index: 5; 
         }
 
         /* Success Message Styling */
         #success-message {
-            display: none; /* Hidden by default */
+            display: none; 
         }
     </style>
 </head>
@@ -91,8 +100,8 @@
     </div>
 
     <div class="container" id="success-message">
-        <img src="https://thumbs.dreamstime.com/b/stunning-cosmic-images-372415810.jpg" alt="Success image">
-        <h1>Yay! I love you! ❤️</h1>
+        <img src="https://i.postimg.cc/5046pvQL/IMG-9069.jpg" alt="Success image">
+        <h1>Yay! I love Gôn! ❤️</h1>
     </div>
 
     <script>
@@ -101,38 +110,74 @@
         const questionContainer = document.getElementById('question-container');
         const successMessage = document.getElementById('success-message');
 
-        // Current font size for the Yes button
+        // Current font size and padding for the Yes button
         let yesBtnFontSize = 1.2; 
-        // Current padding to keep it proportional
         let yesBtnPadding = 15;
 
-        // Function to move the No button randomly
-        noBtn.addEventListener('mouseover', () => {
-            // Get window dimensions
+        // Function to move the No button randomly with collision detection
+        const moveNoButton = (e) => {
+            // If the event is touchstart, prevent the default tap behavior
+            if(e && e.type === 'touchstart') {
+                e.preventDefault();
+            }
+
             const windowWidth = window.innerWidth;
             const windowHeight = window.innerHeight;
-            
-            // Get button dimensions
             const btnWidth = noBtn.offsetWidth;
             const btnHeight = noBtn.offsetHeight;
 
-            // Calculate random position
-            // We subtract button dimensions to ensure it stays fully on screen
-            const randomX = Math.random() * (windowWidth - btnWidth);
-            const randomY = Math.random() * (windowHeight - btnHeight);
+            // Get the current position and size of the Yes button
+            const yesRect = yesBtn.getBoundingClientRect();
 
-            // Apply new position using fixed positioning so it breaks out of the layout
+            let newX, newY;
+            let overlap = true;
+            let attempts = 0;
+
+            // Loop to find a position that doesn't overlap with the Yes button
+            // We try 50 times. If we can't find a safe spot (e.g., Yes is too big), we stop trying to avoid freezing.
+            while (overlap && attempts < 50) {
+                // Generate random coordinates within the viewport
+                newX = Math.random() * (windowWidth - btnWidth);
+                newY = Math.random() * (windowHeight - btnHeight);
+
+                // Check for overlap with the Yes button (adding a 20px buffer zone)
+                // Logic: overlapping if (Left A < Right B) and (Right A > Left B) and (Top A < Bottom B) and (Bottom A > Top B)
+                const noLeft = newX;
+                const noRight = newX + btnWidth;
+                const noTop = newY;
+                const noBottom = newY + btnHeight;
+
+                const yesLeft = yesRect.left - 20;
+                const yesRight = yesRect.right + 20;
+                const yesTop = yesRect.top - 20;
+                const yesBottom = yesRect.bottom + 20;
+
+                if (noLeft < yesRight && noRight > yesLeft && noTop < yesBottom && noBottom > yesTop) {
+                    overlap = true; // Still overlapping, try again
+                } else {
+                    overlap = false; // Safe spot found!
+                }
+                attempts++;
+            }
+
+            // Apply new position using fixed positioning
             noBtn.style.position = 'fixed';
-            noBtn.style.left = randomX + 'px';
-            noBtn.style.top = randomY + 'px';
+            noBtn.style.left = newX + 'px';
+            noBtn.style.top = newY + 'px';
 
             // Make the Yes button bigger
-            yesBtnFontSize += 0.5; // Increase font size
-            yesBtnPadding += 5;    // Increase padding
+            yesBtnFontSize += 0.2; // Increase font size slightly less aggressively so it fits on mobile longer
+            yesBtnPadding += 2;    
             
             yesBtn.style.fontSize = `${yesBtnFontSize}rem`;
             yesBtn.style.padding = `${yesBtnPadding}px ${yesBtnPadding * 2}px`;
-        });
+        };
+
+        // Desktop: Move on mouseover
+        noBtn.addEventListener('mouseover', moveNoButton);
+        
+        // Mobile: Move on touch
+        noBtn.addEventListener('touchstart', moveNoButton);
 
         // Function for when she clicks Yes
         yesBtn.addEventListener('click', () => {
