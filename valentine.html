@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will you be my Valentine?</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffe6e6; /* Light pink background */
+            font-family: 'Arial', sans-serif;
+            overflow: hidden; /* Prevents scrollbars when button moves */
+        }
+
+        .container {
+            text-align: center;
+            position: relative;
+        }
+
+        /* Styling for the images */
+        img {
+            max-width: 300px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+
+        h1 {
+            color: #ff4d4d;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            align-items: center;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #yesBtn {
+            background-color: #ff4d4d;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(255, 77, 77, 0.4);
+        }
+
+        #yesBtn:hover {
+            background-color: #e60000;
+            transform: scale(1.05);
+        }
+
+        #noBtn {
+            background-color: #ffffff;
+            color: #ff4d4d;
+            border: 2px solid #ff4d4d;
+            position: relative; /* Allows us to move it easily */
+        }
+
+        /* Success Message Styling */
+        #success-message {
+            display: none; /* Hidden by default */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="question-container">
+        <img src="https://www.shutterstock.com/image-photo/dog-holding-bouquet-tulips-his-600nw-2120647046.jpg" alt="Cute image" id="mainImage">
+        
+        <h1>Will Gôn be my Valentine?</h1>
+        
+        <div class="buttons">
+            <button id="yesBtn">Yes</button>
+            <button id="noBtn">No</button>
+        </div>
+    </div>
+
+    <div class="container" id="success-message">
+        <img src="https://thumbs.dreamstime.com/b/stunning-cosmic-images-372415810.jpg" alt="Success image">
+        <h1>Yay! I love you! ❤️</h1>
+    </div>
+
+    <script>
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const questionContainer = document.getElementById('question-container');
+        const successMessage = document.getElementById('success-message');
+
+        // Current font size for the Yes button
+        let yesBtnFontSize = 1.2; 
+        // Current padding to keep it proportional
+        let yesBtnPadding = 15;
+
+        // Function to move the No button randomly
+        noBtn.addEventListener('mouseover', () => {
+            // Get window dimensions
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            
+            // Get button dimensions
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
+
+            // Calculate random position
+            // We subtract button dimensions to ensure it stays fully on screen
+            const randomX = Math.random() * (windowWidth - btnWidth);
+            const randomY = Math.random() * (windowHeight - btnHeight);
+
+            // Apply new position using fixed positioning so it breaks out of the layout
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
+
+            // Make the Yes button bigger
+            yesBtnFontSize += 0.5; // Increase font size
+            yesBtnPadding += 5;    // Increase padding
+            
+            yesBtn.style.fontSize = `${yesBtnFontSize}rem`;
+            yesBtn.style.padding = `${yesBtnPadding}px ${yesBtnPadding * 2}px`;
+        });
+
+        // Function for when she clicks Yes
+        yesBtn.addEventListener('click', () => {
+            questionContainer.style.display = 'none';
+            successMessage.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
